@@ -1,12 +1,17 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import mkcert from 'vite-plugin-mkcert'
 
-export default defineConfig({
-  plugins: [
-    mkcert(), // trusted local CA cert — no browser bypass needed
-    react(),
+export default defineConfig(async ({ command }) => {
+  const plugins = [react()]
+
+  // mkcert generates local TLS certs — only needed for dev, breaks CI/Vercel builds
+  if (command === 'serve') {
+    const mkcert = (await import('vite-plugin-mkcert')).default
+    plugins.unshift(mkcert())
+  }
+
+  plugins.push(
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icons/*.png'],
@@ -28,40 +33,42 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/rakshakservice\.onrender\.com\/.*/,
+            urlPattern: /^https:\/\/garud-kavach-server\.onrender\.com\/.*/ ,
             handler: 'NetworkFirst',
             options: { cacheName: 'api-cache' }
           }
         ]
       }
     })
-  ],
-  server: {
-    port: 5174,
-    host: true, // expose to LAN for mobile testing
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        on: {
-          error(err, _req, _res) {
-            // Suppress noisy ECONNRESET/ECONNREFUSED when Go backend is not yet running
-            if (!['ECONNRESET', 'ECONNREFUSED'].includes(err.code)) {
-              console.error('[api proxy]', err.message)
+  )
+
+  return {
+    plugins,
+    server: {
+      port: 5174,
+      host: true, // expose to LAN for mobile testing
+      proxy: {
+        '/api': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+          on: {
+            error(err, _req, _res) {
+              if (!['ECONNRESET', 'ECONNREFUSED'].includes(err.code)) {
+                console.error('[api proxy]', err.message)
+              }
             }
           }
-        }
-      },
-      '/ws': {
-        target: 'ws://localhost:8080',
-        ws: true,
-        changeOrigin: true,
-        rewriteWsOrigin: true, // rewrite Origin to match target so Go's CORS check passes
-        on: {
-          error(err, _req, _socket) {
-            // Suppress ECONNRESET/ECONNREFUSED — backend may not be running yet
-            if (!['ECONNRESET', 'ECONNREFUSED'].includes(err.code)) {
-              console.error('[ws proxy]', err.message)
+        },
+        '/ws': {
+          target: 'ws://localhost:8080',
+          ws: true,
+          changeOrigin: true,
+          rewriteWsOrigin: true,
+          on: {
+            error(err, _req, _socket) {
+              if (!['ECONNRESET', 'ECONNREFUSED'].includes(err.code)) {
+                console.error('[ws proxy]', err.message)
+              }
             }
           }
         }
