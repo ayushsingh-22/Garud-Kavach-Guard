@@ -19,9 +19,9 @@ const shiftStatus = (shift) => {
   const now   = new Date()
   const start = new Date(shift.start_time)
   const end   = new Date(shift.end_time)
-  if (now >= start && now <= end) return { label: 'Active',    color: '#22c55e', bg: 'rgba(34,197,94,0.12)',   border: 'rgba(34,197,94,0.25)'  }
-  if (now < start)               return { label: 'Upcoming',  color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)' }
-  return                                { label: 'Completed', color: '#64748b', bg: 'rgba(100,116,139,0.10)', border: 'rgba(100,116,139,0.2)' }
+  if (now >= start && now <= end) return { label: 'Active',    color: 'var(--success)', bg: 'rgba(34,197,94,0.12)',   border: 'rgba(34,197,94,0.25)'  }
+  if (now < start)               return { label: 'Upcoming',  color: 'var(--warning)', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)' }
+  return                                { label: 'Completed', color: 'var(--text-muted)', bg: 'rgba(100,116,139,0.10)', border: 'rgba(100,116,139,0.2)' }
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ function ShiftCard({ shift }) {
               marginTop: '0.45rem', paddingTop: '0.45rem',
               borderTop: '1px solid var(--border)'
             }}>
-              Logged: <span style={{ color: '#22c55e', fontWeight: 700 }}>{shift.actual_hours}h</span>
+              Logged: <span style={{ color: 'var(--success)', fontWeight: 700 }}>{shift.actual_hours}h</span>
             </p>
           )}
         </div>
@@ -101,10 +101,10 @@ export default function ShiftSchedule({ onBack }) {
   const [error,   setError]   = useState('')
 
   useEffect(() => {
-    const token = localStorage.getItem('guard_token') || ''
+    const license = localStorage.getItem('guard_license') || ''
     const load = () => {
       fetch(`${API_URL}/api/guard/shifts`, {
-        headers: { 'X-Guard-Token': token },
+        headers: { 'X-Guard-License': license },
       })
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json() })
         .then(d  => { setShifts(Array.isArray(d) ? d : []); setLoading(false) })
@@ -127,15 +127,9 @@ export default function ShiftSchedule({ onBack }) {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-        <button
-          onClick={onBack}
-          style={{
-            background: 'var(--surface2)', border: 'none', color: 'var(--text)',
-            cursor: 'pointer', borderRadius: '50%', width: 36, height: 36,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.1rem', flexShrink: 0,
-          }}
-        >←</button>
+        <button onClick={onBack} className="back-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
         <div>
           <h1 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>My Shifts</h1>
           {!loading && <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 3 }}>{shifts.length} total</p>}
@@ -193,21 +187,21 @@ export default function ShiftSchedule({ onBack }) {
 
       {/* Active */}
       {active.length > 0 && (
-        <Section label="🟢 Active Now">
+        <Section label="Active Now">
           {active.map(s => <ShiftCard key={s.id} shift={s} />)}
         </Section>
       )}
 
       {/* Upcoming */}
       {upcoming.length > 0 && (
-        <Section label="🕐 Upcoming">
+        <Section label="Upcoming">
           {upcoming.map(s => <ShiftCard key={s.id} shift={s} />)}
         </Section>
       )}
 
       {/* Completed */}
       {completed.length > 0 && (
-        <Section label="✓ Completed">
+        <Section label="Completed">
           {completed.map(s => <ShiftCard key={s.id} shift={s} />)}
         </Section>
       )}

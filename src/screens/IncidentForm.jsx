@@ -4,10 +4,10 @@ import imageCompression from 'browser-image-compression'
 const API_URL = import.meta.env.VITE_API_URL || ''
 
 const SEVERITIES = [
-  { value: 'low',    label: '🟢 Low',    color: '#22c55e' },
-  { value: 'medium', label: '🟡 Medium', color: '#f59e0b' },
-  { value: 'high',   label: '🟠 High',   color: '#f97316' },
-  { value: 'sos',    label: '🔴 SOS',    color: '#ef4444' },
+  { value: 'low',    label: 'Low',    color: 'var(--success)' },
+  { value: 'medium', label: 'Medium', color: 'var(--warning)' },
+  { value: 'high',   label: 'High',   color: '#f97316' },
+  { value: 'sos',    label: 'SOS',    color: 'var(--danger)' },
 ]
 
 export default function IncidentForm({ onBack }) {
@@ -67,10 +67,10 @@ export default function IncidentForm({ onBack }) {
         fd.append('photo', fileToUpload)
       }
 
-      const token = localStorage.getItem('guard_token') || ''
+      const license = localStorage.getItem('guard_license') || ''
       const res = await fetch(`${API_URL}/api/guard/incidents`, {
         method: 'POST',
-        headers: { 'X-Guard-Token': token },
+        headers: { 'X-Guard-License': license },
         body: fd,
       })
 
@@ -90,9 +90,11 @@ export default function IncidentForm({ onBack }) {
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center'
       }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
-        <h2 style={{ color: '#22c55e', fontWeight: 700 }}>Incident Reported</h2>
-        <p style={{ color: '#94a3b8', marginTop: '0.5rem' }}>Returning to dashboard…</p>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '1rem' }}>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <h2 style={{ color: 'var(--success)', fontWeight: 700 }}>Incident Reported</h2>
+        <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Returning to dashboard…</p>
       </div>
     )
   }
@@ -100,10 +102,10 @@ export default function IncidentForm({ onBack }) {
   return (
     <div style={{ padding: '1.25rem', paddingBottom: '5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '1.25rem' }}>
-          ← 
+        <button onClick={onBack} className="back-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9' }}>Report Incident</h1>
+        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)' }}>Report Incident</h1>
       </div>
 
       <form onSubmit={submit}>
@@ -119,9 +121,9 @@ export default function IncidentForm({ onBack }) {
                 style={{
                   padding: '0.6rem 0.25rem',
                   borderRadius: 8,
-                  border: `2px solid ${form.severity === s.value ? s.color : '#334155'}`,
-                  background: form.severity === s.value ? `${s.color}22` : '#1e293b',
-                  color: form.severity === s.value ? s.color : '#94a3b8',
+                  border: `2px solid ${form.severity === s.value ? s.color : 'var(--border)'}`,
+                  background: form.severity === s.value ? 'var(--accent-soft)' : 'var(--surface)',
+                  color: form.severity === s.value ? s.color : 'var(--text-muted)',
                   fontSize: '0.7rem',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -188,17 +190,17 @@ export default function IncidentForm({ onBack }) {
               className="btn btn-outline"
               onClick={() => fileRef.current?.click()}
             >
-              📷 Take / Choose Photo
+              Take / Choose Photo
             </button>
           )}
         </div>
 
         {error && (
-          <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '0.75rem' }}>{error}</p>
+          <p style={{ color: 'var(--danger)', fontSize: '0.85rem', marginBottom: '0.75rem' }}>{error}</p>
         )}
 
         <button type="submit" className="btn btn-danger" disabled={loading}>
-          {loading ? <span className="spinner" /> : '⚠️ Submit Incident Report'}
+          {loading ? <span className="spinner" /> : 'Submit Incident Report'}
         </button>
       </form>
     </div>

@@ -2,9 +2,9 @@ import React, { useContext, useState } from 'react'
 import { WSContext } from '../App.jsx'
 
 const statusColor = (wsState) => {
-  if (wsState === 'open') return '#22c55e'
-  if (wsState === 'connecting') return '#f59e0b'
-  return '#ef4444'
+  if (wsState === 'open') return 'var(--success)'
+  if (wsState === 'connecting') return 'var(--warning)'
+  return 'var(--danger)'
 }
 
 const statusLabel = (wsState) => {
@@ -13,7 +13,7 @@ const statusLabel = (wsState) => {
   return 'Disconnected'
 }
 
-export default function Dashboard({ onNav }) {
+export default function Dashboard({ onNav, theme, toggleTheme }) {
   const { wsState, clockedIn, lastPos, clockIn, clockOut, sendSOS, sosSent, sosTime, clearSosSent } = useContext(WSContext)
   const [loading, setLoading] = useState(false)
   const [sosConfirm, setSosConfirm] = useState(false)
@@ -43,24 +43,41 @@ export default function Dashboard({ onNav }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f1f5f9' }}>Field Dashboard</h1>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)' }}>Field Dashboard</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.25rem' }}>
-            <div style={{
+            <div className={wsState === 'open' ? 'status-dot-pulse' : ''} style={{
               width: 8, height: 8, borderRadius: '50%',
               background: statusColor(wsState),
-              boxShadow: wsState === 'open' ? `0 0 6px ${statusColor(wsState)}` : 'none'
+              boxShadow: wsState === 'open' ? `0 0 6px var(--success)` : 'none'
             }} />
-            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{statusLabel(wsState)}</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{statusLabel(wsState)}</span>
           </div>
         </div>
-        <span className={`badge ${clockedIn ? 'badge-success' : 'badge-muted'}`}>
-          {clockedIn ? '🟢 On Duty' : '⚫ Off Duty'}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span className={`badge ${clockedIn ? 'badge-success' : 'badge-muted'}`}>
+            {clockedIn ? '● On Duty' : '● Off Duty'}
+          </span>
+          <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+            {theme === 'dark' ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"/><line x1="12" x2="12" y1="1" y2="3"/><line x1="12" x2="12" y1="21" y2="23"/>
+                <line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/><line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/>
+                <line x1="1" x2="3" y1="12" y2="12"/><line x1="21" x2="23" y1="12" y2="12"/>
+                <line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/><line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Clock In/Out */}
       <div className="card" style={{ marginBottom: '1rem' }}>
-        <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '1rem' }}>
+        <p className="section-label" style={{ marginBottom: '0.25rem' }}>Current Shift</p>
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
           {clockedIn
             ? 'Your location is being shared with the control room every minute.'
             : 'Clock in to start your shift and begin location sharing.'}
@@ -72,10 +89,24 @@ export default function Dashboard({ onNav }) {
         >
           {loading
             ? <span className="spinner" />
-            : clockedIn ? '⏹ Clock Out' : '▶ Clock In'}
+            : clockedIn ? (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="6" y="6" width="12" height="12" rx="1"/>
+                </svg>
+                Clock Out
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Clock In
+              </>
+            )}
         </button>
         {wsState !== 'open' && (
-          <p style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.75rem', textAlign: 'center' }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '0.75rem', textAlign: 'center' }}>
             Waiting for connection before you can clock in…
           </p>
         )}
@@ -84,26 +115,32 @@ export default function Dashboard({ onNav }) {
       {/* Location */}
       {lastPos && (
         <div className="card" style={{ marginBottom: '1rem' }}>
-          <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.5rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            📍 Last Known Location
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            <p className="section-label" style={{ marginBottom: 0 }}>Last Known Location</p>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
             <div>
-              <p style={{ fontSize: '0.7rem', color: '#64748b' }}>Latitude</p>
-              <p style={{ fontSize: '1rem', fontWeight: 600, color: '#f1f5f9' }}>{lastPos.lat.toFixed(5)}</p>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Latitude</p>
+              <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)' }}>{lastPos.lat.toFixed(5)}</p>
             </div>
             <div>
-              <p style={{ fontSize: '0.7rem', color: '#64748b' }}>Longitude</p>
-              <p style={{ fontSize: '1rem', fontWeight: 600, color: '#f1f5f9' }}>{lastPos.lng.toFixed(5)}</p>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Longitude</p>
+              <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)' }}>{lastPos.lng.toFixed(5)}</p>
             </div>
           </div>
           <a
             href={`https://www.google.com/maps?q=${lastPos.lat},${lastPos.lng}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: 'inline-block', marginTop: '0.75rem', fontSize: '0.75rem', color: '#3b82f6', textDecoration: 'none' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--accent)', textDecoration: 'none', fontWeight: 500 }}
           >
-            Open in Google Maps →
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/>
+            </svg>
+            Open in Google Maps
           </a>
         </div>
       )}
@@ -113,17 +150,23 @@ export default function Dashboard({ onNav }) {
         <button
           className="btn btn-outline"
           onClick={() => onNav('incident')}
-          style={{ padding: '1rem', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8rem' }}
+          style={{ padding: '1rem', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}
         >
-          <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+            <line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>
+          </svg>
           Report Incident
         </button>
         <button
           className="btn btn-outline"
           onClick={() => onNav('shifts')}
-          style={{ padding: '1rem', flexDirection: 'column', gap: '0.4rem', fontSize: '0.8rem' }}
+          style={{ padding: '1rem', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}
         >
-          <span style={{ fontSize: '1.5rem' }}>📅</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/>
+            <line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>
+          </svg>
           My Shifts
         </button>
       </div>
@@ -132,13 +175,13 @@ export default function Dashboard({ onNav }) {
       {sosSent && (
         <div style={{
           background: 'linear-gradient(135deg, #7f1d1d, #b91c1c)',
-          borderRadius: '0.75rem',
+          borderRadius: 'var(--radius)',
           padding: '1rem 1.25rem',
           marginBottom: '1rem',
           display: 'flex',
           alignItems: 'flex-start',
           gap: '0.75rem',
-          border: '1.5px solid #ef4444',
+          border: '1.5px solid var(--danger)',
           boxShadow: '0 0 20px rgba(239,68,68,0.35)'
         }}>
           <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>🚨</span>
@@ -170,7 +213,7 @@ export default function Dashboard({ onNav }) {
           marginBottom: '0.5rem', padding: '1.1rem', fontSize: '1rem', letterSpacing: '0.05em',
           ...(sosSent ? {
             background: 'linear-gradient(135deg, #7f1d1d, #b91c1c)',
-            border: '2px solid #ef4444',
+            border: '2px solid var(--danger)',
             boxShadow: '0 0 16px rgba(239,68,68,0.5)'
           } : {})
         }}

@@ -1,7 +1,7 @@
 @import "@fontsource-variable/geist";
 
-/* Mobile-first base styles */
-:root {
+/* ─── Dark mode (default) ─────────────────────────────────────────────────── */
+:root, [data-theme="dark"] {
   --bg: #0f172a;
   --surface: #1e293b;
   --surface2: #334155;
@@ -9,12 +9,42 @@
   --text-muted: #94a3b8;
   --accent: #3b82f6;
   --accent-hover: #2563eb;
+  --accent-soft: rgba(59,130,246,0.12);
   --danger: #ef4444;
   --danger-hover: #dc2626;
   --success: #22c55e;
   --warning: #f59e0b;
   --border: #334155;
   --radius: 12px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --nav-bg: #1e293b;
+  --nav-border: #334155;
+  --glass: rgba(30,41,59,0.85);
+  --glass-border: rgba(148,163,184,0.08);
+  color-scheme: dark;
+}
+
+/* ─── Light mode ──────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --surface2: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: rgba(37,99,235,0.08);
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --success: #16a34a;
+  --warning: #d97706;
+  --border: #cbd5e1;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --nav-bg: #ffffff;
+  --nav-border: #e2e8f0;
+  --glass: rgba(255,255,255,0.9);
+  --glass-border: rgba(0,0,0,0.06);
+  color-scheme: light;
 }
 
 * {
@@ -36,6 +66,7 @@ body {
   font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
   line-height: 1.5;
+  transition: background 0.25s, color 0.25s;
 }
 
 .app {
@@ -53,6 +84,8 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem;
+  box-shadow: var(--shadow);
+  transition: background 0.25s, border-color 0.25s;
 }
 
 /* Buttons */
@@ -68,7 +101,7 @@ body {
   cursor: pointer;
   border: none;
   outline: none;
-  transition: opacity 0.15s, transform 0.1s;
+  transition: opacity 0.15s, transform 0.1s, background 0.2s;
   touch-action: manipulation;
   width: 100%;
 }
@@ -97,8 +130,9 @@ input, textarea, select {
   border-radius: var(--radius);
   color: var(--text);
   font-size: 1rem;
+  font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background 0.25s;
 }
 
 input:focus, textarea:focus, select:focus {
@@ -147,4 +181,186 @@ label {
 }
 .sos-btn {
   animation: sos-pulse 1.5s ease-in-out infinite;
+}
+
+/* ─── Back button ──────────────────────────────────────────────────────────── */
+.back-btn {
+  background: var(--surface2);
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.back-btn:active { background: var(--border); }
+
+/* ─── Section label ────────────────────────────────────────────────────────── */
+.section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Profile styles ───────────────────────────────────────────────────────── */
+.profile-hero {
+  text-align: center;
+  padding: 1.75rem 1.25rem 1.5rem;
+}
+.profile-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 0.75rem;
+}
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent);
+}
+.profile-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent), #6366f1);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.profile-status-dot {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2.5px solid var(--surface);
+}
+.profile-status-dot.active { background: var(--success); }
+.profile-status-dot.inactive { background: var(--warning); }
+
+.profile-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge-on-duty {
+  color: var(--success);
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+}
+.badge-off-duty {
+  color: var(--text-muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+/* ─── Info rows ────────────────────────────────────────────────────────────── */
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border-bottom: none; }
+.info-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.info-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.info-value {
+  font-size: 0.92rem;
+  color: var(--text);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+/* ─── Bottom nav ───────────────────────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--nav-bg);
+  border-top: 1px solid var(--nav-border);
+  display: flex;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.nav-item {
+  flex: 1;
+  padding: 0.6rem 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.15s;
+  font-family: inherit;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+/* ─── Theme toggle button ──────────────────────────────────────────────────── */
+.theme-toggle {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.theme-toggle:active { background: var(--border); }
+
+/* ─── Status dot animation ─────────────────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.status-dot-pulse {
+  animation: pulse-dot 2s ease-in-out infinite;
 }
