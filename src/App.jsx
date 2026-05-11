@@ -1,15 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import apiConfig, { getWsUrl } from './apiConfig'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-// In production, VITE_API_URL points to the deployed backend.
-// In dev, derive from window.location so it works from any device (LAN, mobile).
-const API_URL = import.meta.env.VITE_API_URL || ''
-// In dev, WS goes through the Vite proxy (same host+port as the page) so it
-// works from localhost, LAN, and any IP without hardcoding — Vite handles TLS.
-// In production, derive from VITE_API_URL.
-const WS_URL  = API_URL
-  ? API_URL.replace(/^http/, 'ws')
-  : `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
 const PING_INTERVAL_MS = 60_000 // send location every 60s when clocked in
 
 // ─── Screens ──────────────────────────────────────────────────────────────────
@@ -89,7 +81,7 @@ export default function App() {
     wsRef.current = null
     setWsState('connecting')
 
-    const ws = new WebSocket(`${WS_URL}/ws/guard?license=${encodeURIComponent(token)}`)
+    const ws = new WebSocket(`${getWsUrl()}/ws/guard?license=${encodeURIComponent(token)}`)
 
     ws.onopen = () => {
       if (wsRef.current !== ws) return

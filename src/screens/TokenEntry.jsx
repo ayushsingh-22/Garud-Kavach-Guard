@@ -1,14 +1,31 @@
 import React, { useState } from 'react'
+import apiConfig from '../apiConfig'
 
 export default function TokenEntry({ onToken, theme, toggleTheme }) {
   const [input, setInput] = useState('')
   const [err, setErr] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
     const t = input.trim()
     if (!t) { setErr('Please enter your license number.'); return }
-    onToken(t)
+
+    setLoading(true)
+    setErr('')
+    try {
+      const res = await fetch(`${apiConfig.apiUrl}/api/guard/validate-license?license=${encodeURIComponent(t)}`)
+      const data = await res.json()
+      if (!res.ok) {
+        setErr(data.error || 'Invalid license number.')
+        setLoading(false)
+        return
+      }
+      onToken(t)
+    } catch (_) {
+      setErr('Unable to reach server. Please try again.')
+    }
+    setLoading(false)
   }
 
   return (
@@ -68,8 +85,8 @@ export default function TokenEntry({ onToken, theme, toggleTheme }) {
               />
               {err && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.4rem' }}>{err}</p>}
             </div>
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
-              Connect
+            <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }} disabled={loading}>
+              {loading ? 'Verifying…' : 'Connect'}
             </button>
           </div>
         </form>

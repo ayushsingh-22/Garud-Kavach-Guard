@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-
-const API_URL = import.meta.env.VITE_API_URL || ''
+import apiConfig from '../apiConfig'
 
 const DAY   = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -103,7 +102,7 @@ export default function ShiftSchedule({ onBack }) {
   useEffect(() => {
     const license = localStorage.getItem('guard_license') || ''
     const load = () => {
-      fetch(`${API_URL}/api/guard/shifts`, {
+      fetch(`${apiConfig.apiUrl}/api/guard/shifts`, {
         headers: { 'X-Guard-License': license },
       })
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json() })

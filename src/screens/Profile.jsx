@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { WSContext } from '../App.jsx'
-
-const API_URL = import.meta.env.VITE_API_URL || ''
+import apiConfig from '../apiConfig'
 
 function InfoRow({ icon, label, value }) {
   return (
@@ -23,7 +22,7 @@ export default function Profile({ onBack, onLogout }) {
 
   useEffect(() => {
     const license = localStorage.getItem('guard_license') || ''
-    fetch(`${API_URL}/api/guard/profile`, {
+    fetch(`${apiConfig.apiUrl}/api/guard/profile`, {
       headers: { 'X-Guard-License': license },
     })
       .then(r => { if (!r.ok) throw new Error(r.status); return r.json() })

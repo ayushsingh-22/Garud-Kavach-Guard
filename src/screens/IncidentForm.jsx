@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react'
 import imageCompression from 'browser-image-compression'
-
-const API_URL = import.meta.env.VITE_API_URL || ''
+import apiConfig from '../apiConfig'
 
 const SEVERITIES = [
   { value: 'low',    label: 'Low',    color: 'var(--success)' },
@@ -68,7 +67,7 @@ export default function IncidentForm({ onBack }) {
       }
 
       const license = localStorage.getItem('guard_license') || ''
-      const res = await fetch(`${API_URL}/api/guard/incidents`, {
+      const res = await fetch(`${apiConfig.apiUrl}/api/guard/incidents`, {
         method: 'POST',
         headers: { 'X-Guard-License': license },
         body: fd,
