@@ -22,28 +22,31 @@ export function getWsUrl() {
 }
 
 // On load, check if the primary backend is reachable.
-// In dev this tests the Vite proxy → localhost:8080.
-// In prod this tests the deployed Render URL.
+// Retry up to 3 times with increasing timeout to handle Render cold-starts.
 const healthUrl = PRIMARY_URL
   ? `${PRIMARY_URL}/api/health`
   : '/api/health'; // relative → goes through Vite proxy in dev
 
-fetch(healthUrl, {
-  method: 'GET',
-  mode: 'cors',
-  signal: AbortSignal.timeout(5000),
-})
-  .then((r) => {
-    if (!r.ok) throw new Error('unhealthy');
-    console.log(`[api] Backend reachable via ${PRIMARY_URL || 'proxy'}`);
-    apiConfig.resolved = true;
-  })
-  .catch(() => {
-    console.warn(
-      `[api-fallback] Primary unreachable — switching to ${LOCALHOST_URL}`
-    );
-    apiConfig.apiUrl = LOCALHOST_URL;
-    apiConfig.resolved = true;
-  });
+(async () => {
+  const attempts = [8000, 20000, 45000]; // timeouts: 8s, 20s, 45s
+  for (let i = 0; i < attempts.length; i++) {
+    try {
+      const r = await fetch(healthUrl, {
+        method: 'GET',
+        mode: 'cors',
+        signal: AbortSignal.timeout(attempts[i]),
+      });
+      if (!r.ok) throw new Error('unhealthy');
+      console.log(`[api] Backend reachable via ${PRIMARY_URL || 'proxy'}`);
+      apiConfig.resolved = true;
+      return;
+    } catch {
+      console.warn(`[api] Health check attempt ${i + 1}/${attempts.length} failed`);
+    }
+  }
+  console.warn(`[api-fallback] Primary unreachable — switching to ${LOCALHOST_URL}`);
+  apiConfig.apiUrl = LOCALHOST_URL;
+  apiConfig.resolved = true;
+})();
 
 export default apiConfig;
