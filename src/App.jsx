@@ -48,6 +48,7 @@ export default function App() {
     localStorage.removeItem('guard_license')
     setToken('')
     setScreen('dashboard')
+    window.location.reload()
   }
 
   // ── WebSocket management ────────────────────────────────────────────────────
